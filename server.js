@@ -6,16 +6,16 @@ const { Pool } = require('pg');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Check for database URL
-if (!process.env.DATABASE_URL) {
-    console.error("FATAL ERROR: DATABASE_URL is not defined in the environment.");
-    process.exit(1);
+// Check for database URL (Supports Vercel POSTGRES_URL or Supabase DATABASE_URL)
+const connectionString = process.env.POSTGRES_URL || process.env.DATABASE_URL;
+if (!connectionString) {
+    console.error("FATAL ERROR: POSTGRES_URL or DATABASE_URL is not defined in the environment.");
 }
 
 // Initialize PostgreSQL pool
 const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false } // Required for Supabase
+    connectionString: connectionString,
+    ssl: { rejectUnauthorized: false } // Required for Vercel Postgres / Supabase
 });
 
 // Initialize database table
@@ -118,15 +118,20 @@ app.post('/contact', async (req, res) => {
     }
 });
 
-// Start Server
-const server = app.listen(PORT, () => {
-    console.log(`Server is running at http://localhost:${PORT}`);
-});
-
-// Handle graceful shutdown
-process.on('SIGINT', () => {
-    console.log('Closing server...');
-    server.close(() => {
-        process.exit(0);
+// Start Server Locally if not on Vercel
+if (process.env.NODE_ENV !== 'production') {
+    const server = app.listen(PORT, () => {
+        console.log(`Server is running at http://localhost:${PORT}`);
     });
-});
+
+    // Handle graceful shutdown
+    process.on('SIGINT', () => {
+        console.log('Closing server...');
+        server.close(() => {
+            process.exit(0);
+        });
+    });
+}
+
+// Export for Vercel serverless function compatibility
+module.exports = app;
