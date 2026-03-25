@@ -242,6 +242,22 @@ document.addEventListener('DOMContentLoaded', () => {
             mouse.x = undefined;
             mouse.y = undefined;
         });
+        
+        // Click burst shockwave effect
+        window.addEventListener('click', function() {
+            if(mouse.x && mouse.y) {
+                for (let i = 0; i < particlesArray.length; i++) {
+                    let dx = particlesArray[i].x - mouse.x;
+                    let dy = particlesArray[i].y - mouse.y;
+                    let distance = Math.sqrt(dx*dx + dy*dy);
+                    if(distance < 350) {
+                        let force = (350 - distance) / 25;
+                        particlesArray[i].vx += (dx/distance) * force;
+                        particlesArray[i].vy += (dy/distance) * force;
+                    }
+                }
+            }
+        });
 
         const themeColors = ['#64ffda', '#0284c7', '#8892b0'];
         
@@ -253,23 +269,41 @@ document.addEventListener('DOMContentLoaded', () => {
                 this.directionY = directionY;
                 this.size = size;
                 this.color = color;
+                
+                // Burst physics state
+                this.vx = directionX;
+                this.vy = directionY;
+                
+                // Pulsing size state
+                this.pulseAngle = Math.random() * Math.PI * 2;
+                this.pulseSpeed = Math.random() * 0.05 + 0.02;
             }
             draw() {
+                this.pulseAngle += this.pulseSpeed;
+                let currentSize = this.size + Math.sin(this.pulseAngle) * 1.5;
+                if (currentSize < 0.1) currentSize = 0.1;
+
                 ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
+                ctx.arc(this.x, this.y, currentSize, 0, Math.PI * 2, false);
                 ctx.fillStyle = this.color;
-                ctx.shadowBlur = 10;
+                ctx.shadowBlur = 15;
                 ctx.shadowColor = this.color;
                 ctx.fill();
             }
             update() {
                 if (this.x > canvas.width || this.x < 0 ) {
                     this.directionX = -this.directionX;
+                    this.vx *= -1;
                 }
                 if (this.y > canvas.height || this.y < 0) {
                     this.directionY = -this.directionY;
+                    this.vy *= -1;
                 }
                 
+                // Ease back to normal floating speed over time after a burst
+                this.vx += (this.directionX - this.vx) * 0.02;
+                this.vy += (this.directionY - this.vy) * 0.02;
+
                 // Mouse interaction physics
                 let dx = mouse.x - this.x;
                 let dy = mouse.y - this.y;
@@ -277,14 +311,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 // Gentle repulsion field around cursor
                 if (distance < mouse.radius + this.size){
-                    if (mouse.x < this.x && this.x < canvas.width - this.size * 10) { this.x += 2; }
-                    if (mouse.x > this.x && this.x > this.size * 10) { this.x -= 2; }
-                    if (mouse.y < this.y && this.y < canvas.height - this.size * 10) { this.y += 2; }
-                    if (mouse.y > this.y && this.y > this.size * 10) { this.y -= 2; }
+                    if (mouse.x < this.x && this.x < canvas.width - this.size * 10) { this.x += 1.5; }
+                    if (mouse.x > this.x && this.x > this.size * 10) { this.x -= 1.5; }
+                    if (mouse.y < this.y && this.y < canvas.height - this.size * 10) { this.y += 1.5; }
+                    if (mouse.y > this.y && this.y > this.size * 10) { this.y -= 1.5; }
                 }
 
-                this.x += this.directionX;
-                this.y += this.directionY;
+                this.x += this.vx;
+                this.y += this.vy;
                 this.draw();
             }
         }

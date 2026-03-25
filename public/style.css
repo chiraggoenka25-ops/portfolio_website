@@ -427,12 +427,14 @@ footer {
         width: 40px;
         height: 40px;
         border: 2px solid var(--accent-teal);
-        transition: transform 0.15s ease-out, background-color 0.2s;
+        transition: transform 0.15s ease-out, background-color 0.2s, border-radius 0.2s, box-shadow 0.2s;
     }
     .cursor-outline.hovered {
-        transform: translate(-50%, -50%) scale(1.5);
-        background-color: rgba(100, 255, 218, 0.1);
-        border-color: transparent;
+        transform: translate(-50%, -50%) scale(1.6);
+        background-color: rgba(100, 255, 218, 0.2);
+        border: 1px solid var(--accent-teal);
+        border-radius: 12px;
+        box-shadow: 0 0 15px rgba(100, 255, 218, 0.4);
     }
 }
 @media (pointer: coarse) {
