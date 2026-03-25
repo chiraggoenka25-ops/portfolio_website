@@ -314,8 +314,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             draw() {
                 this.pulseAngle += this.pulseSpeed;
-                // Stronger Pulsating Effect
-                let currentSize = this.size + Math.sin(this.pulseAngle) * 2.5;
+                // Balanced Pulsating Effect
+                let currentSize = this.size + Math.sin(this.pulseAngle) * 1.8;
                 if (currentSize < 0.1) currentSize = 0.1;
 
                 ctx.shadowBlur = 0; 
