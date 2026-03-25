@@ -366,36 +366,50 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 this.x += this.vx;
                 this.y += this.vy;
+                
+                // Smoother Velocity Easing
+                this.vx *= 0.99;
+                this.vy *= 0.99;
+
                 this.draw();
             }
         }
         
         function init() {
             particlesArray = [];
-            // Balanced Density
-            let numberOfParticles = (canvas.height * canvas.width) / 15000;
-            for (let i = 0; i < numberOfParticles; i++) {
-                let size = (Math.random() * 2.5) + 0.5;
-                let x = (Math.random() * ((innerWidth - size * 2) - (size * 2)) + size * 2);
-                let y = (Math.random() * ((innerHeight - size * 2) - (size * 2)) + size * 2);
-                let directionX = (Math.random() * 1) - 0.5;
-                let directionY = (Math.random() * 1) - 0.5;
-                let color = themeColors[Math.floor(Math.random() * themeColors.length)];
-                particlesArray.push(new Particle(x, y, directionX, directionY, size, color));
+            // Jittered Grid Initialization for "Even Spread"
+            const spacing = 140; 
+            for (let x = 0; x < canvas.width; x += spacing) {
+                for (let y = 0; y < canvas.height; y += spacing) {
+                    // Jitter the position so it's not a perfect grid but evenly distributed
+                    let posX = x + (Math.random() * spacing);
+                    let posY = y + (Math.random() * spacing);
+                    let size = (Math.random() * 2.0) + 1.0;
+                    let directionX = (Math.random() * 0.8) - 0.4;
+                    let directionY = (Math.random() * 0.8) - 0.4;
+                    let color = themeColors[Math.floor(Math.random() * themeColors.length)];
+                    particlesArray.push(new Particle(posX, posY, directionX, directionY, size, color));
+                }
             }
         }
         
         function connect() {
             for (let a = 0; a < particlesArray.length; a++) {
+                let connections = 0;
+                const maxConnections = 8; // Prevent "messy clusters"
+
                 for (let b = a + 1; b < particlesArray.length; b++) {
+                    if (connections >= maxConnections) break;
+
                     let dx = particlesArray[a].x - particlesArray[b].x;
                     let dy = particlesArray[a].y - particlesArray[b].y;
                     let distance = (dx*dx) + (dy*dy);
                     
-                    // Spider-Web Silks (Balanced)
-                    if (distance < 18000) {
-                        let opacityValue = 1 - (distance/18000);
-                        ctx.strokeStyle = `rgba(255, 255, 255, ${opacityValue * 0.3})`; 
+                    // Spider-Web Silks (Slightly larger range, but capped connections)
+                    if (distance < 25000) {
+                        connections++;
+                        let opacityValue = 1 - (distance/25000);
+                        ctx.strokeStyle = `rgba(255, 255, 255, ${opacityValue * 0.25})`; 
                         ctx.lineWidth = mouse.isClicking ? 1.5 : 0.8; 
                         ctx.beginPath();
                         ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
@@ -404,17 +418,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
                 
-                // Arc Reactor Repulsor Beams (Balanced Intensity)
+                // Arc Reactor Repulsor Beams (Stay consistently smooth)
                 if(mouse.x && mouse.y) {
                     let dxMouse = particlesArray[a].x - mouse.x;
                     let dyMouse = particlesArray[a].y - mouse.y;
                     let distanceMouse = (dxMouse*dxMouse) + (dyMouse*dyMouse);
                     
-                    let beamDistance = mouse.isClicking ? 70000 : 35000;
+                    let beamDistance = mouse.isClicking ? 75000 : 35000;
                     if(distanceMouse < beamDistance) {
                         let mouseOpacity = 1 - (distanceMouse/beamDistance);
-                        ctx.strokeStyle = `rgba(0, 243, 255, ${mouseOpacity * 0.85})`; 
-                        ctx.lineWidth = mouse.isClicking ? 3.5 : 1.5; 
+                        ctx.strokeStyle = `rgba(0, 243, 255, ${mouseOpacity * 0.8})`; 
+                        ctx.lineWidth = mouse.isClicking ? 3.0 : 1.2; 
                         ctx.beginPath();
                         ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
                         ctx.lineTo(mouse.x, mouse.y);
