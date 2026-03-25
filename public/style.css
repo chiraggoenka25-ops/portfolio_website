@@ -26,22 +26,6 @@
     box-sizing: border-box;
 }
 
-/* Custom Ghost Scrollbar */
-::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-}
-::-webkit-scrollbar-track {
-    background: var(--bg-dark-navy);
-}
-::-webkit-scrollbar-thumb {
-    background: #233554;
-    border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-    background: var(--accent-teal);
-}
-
 html {
     scroll-behavior: smooth;
     font-family: 'Inter', sans-serif;
