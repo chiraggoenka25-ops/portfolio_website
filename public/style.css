@@ -141,7 +141,31 @@ p {
 
 .about-text h1 {
     font-size: 3.5rem;
+    margin-bottom: 10px;
+}
+
+.typing-container {
+    font-size: 2rem;
+    font-weight: 600;
     margin-bottom: 20px;
+    height: 40px; /* Prevent layout jump */
+    color: var(--text-main);
+}
+.typed-text {
+    color: var(--accent-teal);
+}
+.cursor {
+    display: inline-block;
+    width: 3px;
+    background-color: var(--accent-teal);
+    animation: blink 1s infinite;
+}
+.cursor.typing {
+    animation: none;
+}
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
 }
 
 .about-text p {
@@ -366,6 +390,55 @@ footer {
 }
 .toast-error {
     border-color: #ef4444;
+}
+
+/* Particles & Custom Cursor */
+#particles-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.8;
+}
+
+@media (pointer: fine) {
+    body, a, button, input, textarea, .skill-tag, .card, .skill-box {
+        cursor: none !important;
+    }
+    .cursor-dot, .cursor-outline {
+        position: fixed;
+        top: 0;
+        left: 0;
+        transform: translate(-50%, -50%);
+        border-radius: 50%;
+        z-index: 9999;
+        pointer-events: none;
+    }
+    .cursor-dot {
+        width: 8px;
+        height: 8px;
+        background-color: var(--accent-teal);
+        transition: opacity 0.2s ease;
+    }
+    .cursor-outline {
+        width: 40px;
+        height: 40px;
+        border: 2px solid var(--accent-teal);
+        transition: transform 0.15s ease-out, background-color 0.2s;
+    }
+    .cursor-outline.hovered {
+        transform: translate(-50%, -50%) scale(1.5);
+        background-color: rgba(100, 255, 218, 0.1);
+        border-color: transparent;
+    }
+}
+@media (pointer: coarse) {
+    .cursor-dot, .cursor-outline {
+        display: none !important;
+    }
 }
 
 /* Animations */

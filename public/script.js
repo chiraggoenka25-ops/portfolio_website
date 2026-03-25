@@ -144,4 +144,184 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    // Typing Animation
+    const typedTextSpan = document.querySelector(".typed-text");
+    const cursorSpan = document.querySelector(".cursor");
+    
+    if(typedTextSpan && cursorSpan) {
+        const textArray = ["Web Applications", "Backend Servers", "Interactive UI", "Digital Experiences"];
+        const typingDelay = 100;
+        const erasingDelay = 50;
+        const newTextDelay = 2000;
+        let textArrayIndex = 0;
+        let charIndex = 0;
+        
+        function type() {
+            if (charIndex < textArray[textArrayIndex].length) {
+                if(!cursorSpan.classList.contains("typing")) cursorSpan.classList.add("typing");
+                typedTextSpan.textContent += textArray[textArrayIndex].charAt(charIndex);
+                charIndex++;
+                setTimeout(type, typingDelay);
+            } 
+            else {
+                cursorSpan.classList.remove("typing");
+                setTimeout(erase, newTextDelay);
+            }
+        }
+        
+        function erase() {
+            if (charIndex > 0) {
+                if(!cursorSpan.classList.contains("typing")) cursorSpan.classList.add("typing");
+                typedTextSpan.textContent = textArray[textArrayIndex].substring(0, charIndex-1);
+                charIndex--;
+                setTimeout(erase, erasingDelay);
+            } 
+            else {
+                cursorSpan.classList.remove("typing");
+                textArrayIndex++;
+                if(textArrayIndex >= textArray.length) textArrayIndex = 0;
+                setTimeout(type, typingDelay + 1100);
+            }
+        }
+        
+        setTimeout(type, newTextDelay + 250);
+    }
+
+    // Custom Cursor
+    const cursorDot = document.querySelector('.cursor-dot');
+    const cursorOutline = document.querySelector('.cursor-outline');
+    
+    if (cursorDot && cursorOutline && window.matchMedia("(pointer: fine)").matches) {
+        window.addEventListener('mousemove', (e) => {
+            const posX = e.clientX;
+            const posY = e.clientY;
+            
+            cursorDot.style.left = `${posX}px`;
+            cursorDot.style.top = `${posY}px`;
+            
+            cursorOutline.animate({
+                left: `${posX}px`,
+                top: `${posY}px`
+            }, { duration: 500, fill: "forwards" });
+        });
+        
+        document.querySelectorAll('a, button, input, textarea, .skill-box, .card, .profile-img').forEach(el => {
+            el.addEventListener('mouseenter', () => cursorOutline.classList.add('hovered'));
+            el.addEventListener('mouseleave', () => cursorOutline.classList.remove('hovered'));
+        });
+    }
+
+    // Particle Background
+    const canvas = document.getElementById("particles-canvas");
+    if(canvas && window.matchMedia("(pointer: fine)").matches) {
+        const ctx = canvas.getContext("2d");
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        let particlesArray;
+        
+        let mouse = {
+            x: null,
+            y: null,
+            radius: (canvas.height/80) * (canvas.width/80)
+        }
+        
+        window.addEventListener('mousemove', function(event) {
+            mouse.x = event.x;
+            mouse.y = event.y;
+        });
+        
+        window.addEventListener('resize', function() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            mouse.radius = ((canvas.height/80) * (canvas.height/80));
+            init();
+        });
+        
+        window.addEventListener('mouseout', function() {
+            mouse.x = undefined;
+            mouse.y = undefined;
+        });
+        
+        class Particle {
+            constructor(x, y, directionX, directionY, size) {
+                this.x = x;
+                this.y = y;
+                this.directionX = directionX;
+                this.directionY = directionY;
+                this.size = size;
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
+                ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent-teal').trim() || '#64ffda';
+                ctx.fill();
+            }
+            update() {
+                if (this.x > canvas.width || this.x < 0 ) {
+                    this.directionX = -this.directionX;
+                }
+                if (this.y > canvas.height || this.y < 0) {
+                    this.directionY = -this.directionY;
+                }
+                let dx = mouse.x - this.x;
+                let dy = mouse.y - this.y;
+                let distance = Math.sqrt(dx*dx + dy*dy);
+                if (distance < mouse.radius + this.size){
+                    if (mouse.x < this.x && this.x < canvas.width - this.size * 10) { this.x += 10; }
+                    if (mouse.x > this.x && this.x > this.size * 10) { this.x -= 10; }
+                    if (mouse.y < this.y && this.y < canvas.height - this.size * 10) { this.y += 10; }
+                    if (mouse.y > this.y && this.y > this.size * 10) { this.y -= 10; }
+                }
+                this.x += this.directionX;
+                this.y += this.directionY;
+                this.draw();
+            }
+        }
+        
+        function init() {
+            particlesArray = [];
+            let numberOfParticles = (canvas.height * canvas.width) / 12000;
+            for (let i = 0; i < numberOfParticles; i++) {
+                let size = (Math.random() * 2) + 1;
+                let x = (Math.random() * ((innerWidth - size * 2) - (size * 2)) + size * 2);
+                let y = (Math.random() * ((innerHeight - size * 2) - (size * 2)) + size * 2);
+                let directionX = (Math.random() * 1.5) - 0.75;
+                let directionY = (Math.random() * 1.5) - 0.75;
+                particlesArray.push(new Particle(x, y, directionX, directionY, size));
+            }
+        }
+        
+        function connect() {
+            let opacityValue = 1;
+            for (let a = 0; a < particlesArray.length; a++) {
+                for (let b = a; b < particlesArray.length; b++) {
+                    let distance = ((particlesArray[a].x - particlesArray[b].x) * (particlesArray[a].x - particlesArray[b].x))
+                    + ((particlesArray[a].y - particlesArray[b].y) * (particlesArray[a].y - particlesArray[b].y));
+                    if (distance < (canvas.width/7) * (canvas.height/7)) {
+                        opacityValue = 1 - (distance/20000);
+                        ctx.strokeStyle = `rgba(100, 255, 218, ${opacityValue/3.5})`;
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
+                        ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            ctx.clearRect(0,0,innerWidth, innerHeight);
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update();
+            }
+            connect();
+        }
+        
+        init();
+        animate();
+    }
 });
