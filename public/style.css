@@ -579,21 +579,16 @@ footer {
     height: 24px;
 }
 
-/* Spider-Web Zip String Animation */
-.web-string {
-    position: fixed;
-    width: 2px;
-    height: 0;
-    background-color: rgba(255, 255, 255, 0.9);
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-    z-index: 9999;
-    transform-origin: top;
-    transition: height 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), top 0.25s;
-    pointer-events: none;
+/* Stark Repulsor scroll animation */
+@keyframes repulsor-blast {
+    0% { transform: scale(1); box-shadow: 0 0 10px #00f3ff; }
+    50% { transform: scale(1.4); box-shadow: 0 0 40px #00f3ff, 0 0 80px #00f3ff; background-color: #00f3ff; border-radius: 50%; }
+    100% { transform: scale(1); box-shadow: 0 0 15px var(--accent-teal); border-radius: 4px; }
 }
-.web-string.shoot {
-    height: 100vh;
-    top: 0 !important;
+
+#scrollToTopBtn.firing {
+    animation: repulsor-blast 0.6s ease-out forwards;
+    pointer-events: none;
 }
 
 /* Mobile Responsive */
