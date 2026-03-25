@@ -90,21 +90,32 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         scrollToTopBtn.addEventListener("click", () => {
-            // Stark Repulsor Blast Effect
-            scrollToTopBtn.classList.add('firing');
+            // HUD Target Spawning
+            const hud = document.createElement('div');
+            hud.classList.add('hud-target');
+            document.body.appendChild(hud);
             
-            // Wait for repulsor to 'charge' then blast upwards
+            // Motion Blur for Combat Mode Warp
+            document.body.style.transition = "filter 0.4s ease";
+            document.body.style.filter = "contrast(1.3) brightness(1.2) hue-rotate(-5deg)";
+
+            // Wait 600ms for Lock-on crosshair recoil, then Rip Scroll
             setTimeout(() => {
                 window.scrollTo({
                     top: 0,
                     behavior: "smooth"
                 });
-            }, 100);
+            }, 600);
 
-            // Cooldown phase
+            // Clear effects
             setTimeout(() => {
-                scrollToTopBtn.classList.remove('firing');
-            }, 700);
+                document.body.style.filter = "none";
+            }, 1200);
+
+            // Cleanup DOM
+            setTimeout(() => {
+                hud.remove();
+            }, 1000);
         });
     }
 

@@ -591,6 +591,54 @@ footer {
     pointer-events: none;
 }
 
+/* Iron Man HUD Targeting System */
+.hud-target {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 250px;
+    height: 250px;
+    border: 4px dashed #00f3ff;
+    border-radius: 50%;
+    z-index: 100000;
+    opacity: 0;
+    pointer-events: none;
+    box-shadow: 0 0 50px rgba(0, 243, 255, 0.8), inset 0 0 50px rgba(0, 243, 255, 0.8);
+    animation: hud-lock-on 0.9s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.hud-target::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 4px;
+    height: 40px;
+    background: #e62429;
+    box-shadow: 0 0 20px #e62429;
+}
+.hud-target::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40px;
+    height: 4px;
+    background: #e62429;
+    box-shadow: 0 0 20px #e62429;
+}
+
+@keyframes hud-lock-on {
+    0% { transform: translate(-50%, -50%) scale(5) rotate(0deg); opacity: 0; }
+    20% { opacity: 1; }
+    60% { transform: translate(-50%, -50%) scale(1) rotate(180deg); opacity: 1; }
+    70% { transform: translate(-50%, -50%) scale(0.9) rotate(180deg); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(15) rotate(270deg); opacity: 0; border-color: #e62429; box-shadow: 0 0 100px rgba(230, 36, 41, 0.9), inset 0 0 100px rgba(230, 36, 41, 0.9); }
+}
+
 /* Mobile Responsive */
 @media (max-width: 768px) {
     .nav-content {
