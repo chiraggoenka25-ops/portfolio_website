@@ -224,7 +224,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let mouse = {
             x: null,
             y: null,
-            radius: (canvas.height/80) * (canvas.width/80)
+            radius: 130
         }
         
         window.addEventListener('mousemove', function(event) {
@@ -235,7 +235,6 @@ document.addEventListener('DOMContentLoaded', () => {
         window.addEventListener('resize', function() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
-            mouse.radius = ((canvas.height/80) * (canvas.height/80));
             init();
         });
         
@@ -243,19 +242,24 @@ document.addEventListener('DOMContentLoaded', () => {
             mouse.x = undefined;
             mouse.y = undefined;
         });
+
+        const themeColors = ['#64ffda', '#0284c7', '#8892b0'];
         
         class Particle {
-            constructor(x, y, directionX, directionY, size) {
+            constructor(x, y, directionX, directionY, size, color) {
                 this.x = x;
                 this.y = y;
                 this.directionX = directionX;
                 this.directionY = directionY;
                 this.size = size;
+                this.color = color;
             }
             draw() {
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
-                ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent-teal').trim() || '#64ffda';
+                ctx.fillStyle = this.color;
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = this.color;
                 ctx.fill();
             }
             update() {
@@ -265,15 +269,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (this.y > canvas.height || this.y < 0) {
                     this.directionY = -this.directionY;
                 }
+                
+                // Mouse interaction physics
                 let dx = mouse.x - this.x;
                 let dy = mouse.y - this.y;
                 let distance = Math.sqrt(dx*dx + dy*dy);
+                
+                // Gentle repulsion field around cursor
                 if (distance < mouse.radius + this.size){
-                    if (mouse.x < this.x && this.x < canvas.width - this.size * 10) { this.x += 10; }
-                    if (mouse.x > this.x && this.x > this.size * 10) { this.x -= 10; }
-                    if (mouse.y < this.y && this.y < canvas.height - this.size * 10) { this.y += 10; }
-                    if (mouse.y > this.y && this.y > this.size * 10) { this.y -= 10; }
+                    if (mouse.x < this.x && this.x < canvas.width - this.size * 10) { this.x += 2; }
+                    if (mouse.x > this.x && this.x > this.size * 10) { this.x -= 2; }
+                    if (mouse.y < this.y && this.y < canvas.height - this.size * 10) { this.y += 2; }
+                    if (mouse.y > this.y && this.y > this.size * 10) { this.y -= 2; }
                 }
+
                 this.x += this.directionX;
                 this.y += this.directionY;
                 this.draw();
@@ -282,30 +291,52 @@ document.addEventListener('DOMContentLoaded', () => {
         
         function init() {
             particlesArray = [];
-            let numberOfParticles = (canvas.height * canvas.width) / 12000;
+            // Increase density slightly
+            let numberOfParticles = (canvas.height * canvas.width) / 10000;
             for (let i = 0; i < numberOfParticles; i++) {
-                let size = (Math.random() * 2) + 1;
+                let size = (Math.random() * 2.5) + 0.5;
                 let x = (Math.random() * ((innerWidth - size * 2) - (size * 2)) + size * 2);
                 let y = (Math.random() * ((innerHeight - size * 2) - (size * 2)) + size * 2);
-                let directionX = (Math.random() * 1.5) - 0.75;
-                let directionY = (Math.random() * 1.5) - 0.75;
-                particlesArray.push(new Particle(x, y, directionX, directionY, size));
+                let directionX = (Math.random() * 1) - 0.5;
+                let directionY = (Math.random() * 1) - 0.5;
+                let color = themeColors[Math.floor(Math.random() * themeColors.length)];
+                particlesArray.push(new Particle(x, y, directionX, directionY, size, color));
             }
         }
         
         function connect() {
-            let opacityValue = 1;
             for (let a = 0; a < particlesArray.length; a++) {
                 for (let b = a; b < particlesArray.length; b++) {
-                    let distance = ((particlesArray[a].x - particlesArray[b].x) * (particlesArray[a].x - particlesArray[b].x))
-                    + ((particlesArray[a].y - particlesArray[b].y) * (particlesArray[a].y - particlesArray[b].y));
-                    if (distance < (canvas.width/7) * (canvas.height/7)) {
-                        opacityValue = 1 - (distance/20000);
-                        ctx.strokeStyle = `rgba(100, 255, 218, ${opacityValue/3.5})`;
+                    let dx = particlesArray[a].x - particlesArray[b].x;
+                    let dy = particlesArray[a].y - particlesArray[b].y;
+                    let distance = (dx*dx) + (dy*dy);
+                    
+                    // Connect particles to each other
+                    if (distance < 12000) {
+                        let opacityValue = 1 - (distance/12000);
+                        ctx.strokeStyle = `rgba(100, 255, 218, ${opacityValue * 0.25})`;
+                        ctx.shadowBlur = 0; // Prevent massive line lag
                         ctx.lineWidth = 1;
                         ctx.beginPath();
                         ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
                         ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
+                        ctx.stroke();
+                    }
+                }
+                
+                // Connect particle directly to the mouse cursor!
+                if(mouse.x && mouse.y) {
+                    let dxMouse = particlesArray[a].x - mouse.x;
+                    let dyMouse = particlesArray[a].y - mouse.y;
+                    let distanceMouse = (dxMouse*dxMouse) + (dyMouse*dyMouse);
+                    
+                    if(distanceMouse < 24000) {
+                        let mouseOpacity = 1 - (distanceMouse/24000);
+                        ctx.strokeStyle = `rgba(2, 132, 199, ${mouseOpacity * 0.6})`; // Creates cool blue tracking lines
+                        ctx.lineWidth = 1.2;
+                        ctx.beginPath();
+                        ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
+                        ctx.lineTo(mouse.x, mouse.y);
                         ctx.stroke();
                     }
                 }
