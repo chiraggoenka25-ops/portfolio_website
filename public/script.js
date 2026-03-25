@@ -95,9 +95,12 @@ document.addEventListener('DOMContentLoaded', () => {
             hud.classList.add('hud-target');
             document.body.appendChild(hud);
             
-            // Motion Blur for Combat Mode Warp
-            document.body.style.transition = "filter 0.4s ease";
-            document.body.style.filter = "contrast(1.3) brightness(1.2) hue-rotate(-5deg)";
+            // Motion Blur for Combat Mode Warp (Avoid body filter to preserve viewport fixed pos)
+            const effectElements = document.querySelectorAll('canvas, nav, .section, footer');
+            effectElements.forEach(el => {
+                el.style.transition = "filter 0.4s ease";
+                el.style.filter = "contrast(1.3) brightness(1.2) hue-rotate(-5deg)";
+            });
 
             // Wait 600ms for Lock-on crosshair recoil, then Rip Scroll
             setTimeout(() => {
@@ -109,7 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Clear effects
             setTimeout(() => {
-                document.body.style.filter = "none";
+                effectElements.forEach(el => el.style.filter = "");
             }, 1200);
 
             // Cleanup DOM
