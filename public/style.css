@@ -167,22 +167,6 @@ p {
     background: rgba(100, 255, 218, 0.1);
 }
 
-.hero-actions {
-    display: flex;
-    gap: 15px;
-    margin-top: 20px;
-    flex-wrap: wrap;
-}
-.btn-outline {
-    background: transparent;
-    border: 1px solid var(--text-muted);
-    color: var(--text-muted);
-}
-.btn-outline:hover {
-    border-color: var(--text-main);
-    color: var(--text-main);
-    background: rgba(255, 255, 255, 0.05);
-}
 
 .theme-btn {
     background: none;
