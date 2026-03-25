@@ -2,13 +2,13 @@
 
 A complete, modern, and responsive personal portfolio website with a fully functional contact form. 
 The frontend is built using standard HTML, vanilla CSS (Dark Navy & Teal aesthetic), and vanilla JavaScript. 
-The backend is powered by Node.js, Express, and a single-file SQLite database (`better-sqlite3`).
+The backend is powered by Node.js, Express, and a PostgreSQL database (e.g., Supabase) using `pg`.
 
 ## Features
 - **About Me**: Short bio and profile section.
 - **Skills**: Badge/tag-based layout for technical skills.
 - **Achievements**: Card-based grid layout.
-- **Contact Me**: Working form that saves submissions to a local SQLite database.
+- **Contact Me**: Working form that saves submissions to a PostgreSQL database.
 - **Design**: Fully responsive, dark mode aesthetic, smooth scrolling, and subtle reveal animations on scroll.
 
 ---
@@ -26,8 +26,12 @@ Open your terminal or command prompt and navigate to the folder containing this 
 cd path/to/portfolio_website
 ```
 
-### 2. Install dependencies
-Run the following command to install the required packages (`express` and `better-sqlite3`):
+### 2. Configure Environment and Install Dependencies
+Create a `.env` file in the root of the project and add your database URL:
+```env
+DATABASE_URL=postgres://user:password@host:port/database
+```
+Then run the following command to install the required packages:
 ```bash
 npm install
 ```
@@ -56,7 +60,6 @@ Open your favorite web browser and navigate to:
   - `script.js`: Features intersection observers for scrolling animations and logic for the contact form fetching API.
 - `server.js`: The backend application. Configures the Express server to serve static files from `public/` and defines the `POST /contact` endpoint.
 - `package.json`: Contains project metadata and lists required node modules.
-- `messages.db`: Automatically generated when the server starts. Stores all contact form submissions on a single file database.
 
 ## Stopping the server
 To stop the server from running, go to your terminal and press `Ctrl + C`. This will safely close the database connection and exit the script.

@@ -6,11 +6,37 @@ const { Pool } = require('pg');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Check for database URL
+if (!process.env.DATABASE_URL) {
+    console.error("FATAL ERROR: DATABASE_URL is not defined in the environment.");
+    process.exit(1);
+}
+
 // Initialize PostgreSQL pool
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: { rejectUnauthorized: false } // Required for Supabase
 });
+
+// Initialize database table
+const initDB = async () => {
+    try {
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS messages (
+                id SERIAL PRIMARY KEY,
+                name VARCHAR(255) NOT NULL,
+                email VARCHAR(255) NOT NULL,
+                message TEXT NOT NULL,
+                submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+        console.log("Database table 'messages' initialized.");
+    } catch (err) {
+        console.error("Error initializing database table:", err);
+    }
+};
+
+initDB();
 
 // Middleware
 app.use(express.static(path.join(__dirname, 'public')));
