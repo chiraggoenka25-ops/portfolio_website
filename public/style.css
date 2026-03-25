@@ -167,6 +167,7 @@ p {
     width: 100%;
     height: 100%;
     background: transparent;
+    will-change: transform, clip; /* GPU Hardware Acceleration */
 }
 .glitch::before {
     left: 3px;

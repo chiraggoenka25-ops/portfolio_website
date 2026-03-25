@@ -332,11 +332,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 let currentSize = this.size + Math.sin(this.pulseAngle) * 1.5;
                 if (currentSize < 0.1) currentSize = 0.1;
 
+                ctx.shadowBlur = 0; // Disable universally expensive browser blur!
+                
+                // Free GPU-friendly Fake Glow Wrap
+                ctx.globalAlpha = 0.2;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, currentSize * 3.5, 0, Math.PI * 2, false);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                
+                // Solid Inner Core
+                ctx.globalAlpha = 1.0;
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, currentSize, 0, Math.PI * 2, false);
-                ctx.fillStyle = this.color;
-                ctx.shadowBlur = 15;
-                ctx.shadowColor = this.color;
                 ctx.fill();
             }
             update() {
@@ -379,8 +387,8 @@ document.addEventListener('DOMContentLoaded', () => {
         
         function init() {
             particlesArray = [];
-            // Increase density slightly
-            let numberOfParticles = (canvas.height * canvas.width) / 10000;
+            // Optimized mathematical density for 60FPS lock
+            let numberOfParticles = (canvas.height * canvas.width) / 18000;
             for (let i = 0; i < numberOfParticles; i++) {
                 let size = (Math.random() * 2.5) + 0.5;
                 let x = (Math.random() * ((innerWidth - size * 2) - (size * 2)) + size * 2);
