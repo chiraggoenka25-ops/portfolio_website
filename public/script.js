@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 3000);
     }
 
-    // Reveal Animations using Intersection Observer
+    // Reveal Animations & Skill Bars using Intersection Observer
     const revealElements = document.querySelectorAll('.reveal');
 
     const revealOptions = {
@@ -59,6 +59,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             } else {
                 entry.target.classList.add('active');
+                
+                // If it's the skills section, animate the bars
+                if (entry.target.id === 'skills') {
+                    const skillBars = entry.target.querySelectorAll('.skill-progress');
+                    skillBars.forEach(bar => {
+                        bar.style.width = bar.getAttribute('data-width');
+                    });
+                }
+                
                 observer.unobserve(entry.target);
             }
         });
@@ -67,6 +76,26 @@ document.addEventListener('DOMContentLoaded', () => {
     revealElements.forEach(el => {
         revealOnScroll.observe(el);
     });
+
+    // Scroll to Top Logic
+    const scrollToTopBtn = document.getElementById("scrollToTopBtn");
+    
+    if (scrollToTopBtn) {
+        window.addEventListener("scroll", () => {
+            if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
+                scrollToTopBtn.style.display = "block";
+            } else {
+                scrollToTopBtn.style.display = "none";
+            }
+        });
+
+        scrollToTopBtn.addEventListener("click", () => {
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth"
+            });
+        });
+    }
 
     // Form submission
     const contactForm = document.getElementById('contactForm');
