@@ -1,4 +1,50 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Theme Toggle Logic
+    const themeToggle = document.getElementById('theme-toggle');
+    const root = document.documentElement;
+    const currentTheme = localStorage.getItem('theme') || 'dark';
+
+    if (currentTheme === 'light') {
+        root.setAttribute('data-theme', 'light');
+        if(themeToggle) themeToggle.innerHTML = '🌙';
+    }
+
+    if (themeToggle) {
+        themeToggle.addEventListener('click', () => {
+            const isLight = root.getAttribute('data-theme') === 'light';
+            if (isLight) {
+                root.removeAttribute('data-theme');
+                localStorage.setItem('theme', 'dark');
+                themeToggle.innerHTML = '☀️';
+            } else {
+                root.setAttribute('data-theme', 'light');
+                localStorage.setItem('theme', 'light');
+                themeToggle.innerHTML = '🌙';
+            }
+        });
+    }
+
+    // Toast Notification System
+    function showToast(message, type = 'success') {
+        const toastContainer = document.getElementById('toast-container');
+        if (!toastContainer) return;
+        
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.innerText = message;
+        
+        toastContainer.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.classList.add('show');
+        }, 10);
+        
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 400);
+        }, 3000);
+    }
+
     // Reveal Animations using Intersection Observer
     const revealElements = document.querySelectorAll('.reveal');
 
@@ -54,18 +100,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 if (response.ok) {
-                    formMessage.innerText = 'Message sent successfully!';
-                    formMessage.classList.add('success-text');
+                    showToast('Message sent successfully!', 'success');
                     contactForm.reset();
                 } else {
                     const errorData = await response.json();
-                    formMessage.innerText = errorData.error || 'Failed to send message.';
-                    formMessage.classList.add('error-text');
+                    showToast(errorData.error || 'Failed to send message.', 'error');
                 }
             } catch (error) {
                 console.error('Error:', error);
-                formMessage.innerText = 'Network error. Please try again.';
-                formMessage.classList.add('error-text');
+                showToast('Network error. Please try again.', 'error');
             } finally {
                 submitBtn.innerText = originalBtnText;
                 submitBtn.disabled = false;

@@ -9,6 +9,17 @@
     --nav-bg: rgba(10, 25, 47, 0.95);
 }
 
+:root[data-theme="light"] {
+    --bg-dark-navy: #f8fafc;
+    --bg-alt: #e2e8f0;
+    --text-main: #0f172a;
+    --text-muted: #475569;
+    --accent-teal: #0284c7;
+    --accent-teal-hover: #0369a1;
+    --card-bg: #ffffff;
+    --nav-bg: rgba(248, 250, 252, 0.95);
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -156,6 +167,37 @@ p {
     background: rgba(100, 255, 218, 0.1);
 }
 
+.hero-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+.btn-outline {
+    background: transparent;
+    border: 1px solid var(--text-muted);
+    color: var(--text-muted);
+}
+.btn-outline:hover {
+    border-color: var(--text-main);
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.theme-btn {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: var(--text-main);
+    transition: transform 0.3s ease;
+    display: flex;
+    align-items: center;
+}
+.theme-btn:hover {
+    transform: scale(1.1);
+}
+
 /* Skills */
 #skills h2, #achievements h2, #contact h2 {
     font-size: 2.2rem;
@@ -277,12 +319,61 @@ input:focus, textarea:focus {
     color: #ff6b6b;
 }
 
-/* Footer */
+/* Footer & Socials */
 footer {
     text-align: center;
-    padding: 20px;
+    padding: 40px 20px;
     background: var(--bg-alt);
     font-size: 0.9rem;
+}
+.social-links {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+}
+.social-icon {
+    width: 24px;
+    height: 24px;
+    transition: transform 0.3s ease, color 0.3s ease;
+    color: var(--text-muted);
+}
+.social-icon:hover {
+    color: var(--accent-teal);
+    transform: translateY(-3px);
+}
+
+/* Toast Notifications */
+#toast-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.toast {
+    background: var(--card-bg);
+    color: var(--text-main);
+    padding: 15px 25px;
+    border-radius: 4px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+    border-left: 4px solid var(--accent-teal);
+    transform: translateX(120%);
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    font-weight: 600;
+}
+.toast.show {
+    transform: translateX(0);
+    opacity: 1;
+}
+.toast-success {
+    border-color: #10b981;
+}
+.toast-error {
+    border-color: #ef4444;
 }
 
 /* Animations */
