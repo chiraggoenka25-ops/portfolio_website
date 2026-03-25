@@ -284,9 +284,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     let dy = particlesArray[i].y - mouse.y;
                     let distance = Math.sqrt(dx*dx + dy*dy);
                     if(distance < 500) {
-                        let force = (500 - distance) / 10;
-                        particlesArray[i].vx += (dx/distance) * force * 4; // Massive blast multiplier
-                        particlesArray[i].vy += (dy/distance) * force * 4;
+                        let force = (500 - distance) / 15;
+                        particlesArray[i].vx += (dx/distance) * force * 6; // Enhanced Blast
+                        particlesArray[i].vy += (dy/distance) * force * 6;
                     }
                 }
             }
@@ -314,19 +314,19 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             draw() {
                 this.pulseAngle += this.pulseSpeed;
-                let currentSize = this.size + Math.sin(this.pulseAngle) * 1.5;
+                // Stronger Pulsating Effect
+                let currentSize = this.size + Math.sin(this.pulseAngle) * 2.5;
                 if (currentSize < 0.1) currentSize = 0.1;
 
-                ctx.shadowBlur = 0; // Disable universally expensive browser blur!
+                ctx.shadowBlur = 0; 
                 
-                // Free GPU-friendly Fake Glow Wrap
-                ctx.globalAlpha = 0.2;
+                // Enhanced High-Visibility Glow
+                ctx.globalAlpha = 0.4; // Boosted glow opacity
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, currentSize * 3.5, 0, Math.PI * 2, false);
                 ctx.fillStyle = this.color;
                 ctx.fill();
                 
-                // Solid Inner Core
                 ctx.globalAlpha = 1.0;
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, currentSize, 0, Math.PI * 2, false);
@@ -372,8 +372,8 @@ document.addEventListener('DOMContentLoaded', () => {
         
         function init() {
             particlesArray = [];
-            // Optimized mathematical density for 60FPS lock
-            let numberOfParticles = (canvas.height * canvas.width) / 18000;
+            // Higher Density for cinematic impact
+            let numberOfParticles = (canvas.height * canvas.width) / 12000;
             for (let i = 0; i < numberOfParticles; i++) {
                 let size = (Math.random() * 2.5) + 0.5;
                 let x = (Math.random() * ((innerWidth - size * 2) - (size * 2)) + size * 2);
@@ -387,17 +387,16 @@ document.addEventListener('DOMContentLoaded', () => {
         
         function connect() {
             for (let a = 0; a < particlesArray.length; a++) {
-                for (let b = a; b < particlesArray.length; b++) {
+                for (let b = a + 1; b < particlesArray.length; b++) {
                     let dx = particlesArray[a].x - particlesArray[b].x;
                     let dy = particlesArray[a].y - particlesArray[b].y;
                     let distance = (dx*dx) + (dy*dy);
                     
-                    // Spider-Web Silks (Connects particles to each other)
-                    if (distance < 15000) {
-                        let opacityValue = 1 - (distance/15000);
-                        ctx.strokeStyle = `rgba(255, 255, 255, ${opacityValue * 0.25})`; // White/Grey spider webs
-                        ctx.shadowBlur = 0; // Prevent massive line lag
-                        ctx.lineWidth = mouse.isClicking ? 1.5 : 0.8; // Webs physically thicken under tension
+                    // Spider-Web Silks (More Visible)
+                    if (distance < 20000) {
+                        let opacityValue = 1 - (distance/20000);
+                        ctx.strokeStyle = `rgba(255, 255, 255, ${opacityValue * 0.4})`; 
+                        ctx.lineWidth = mouse.isClicking ? 2.0 : 1.0; 
                         ctx.beginPath();
                         ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
                         ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
@@ -405,19 +404,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
                 
-                // Arc Reactor Repulsor Beams (Connects directly to mouse core)
+                // Arc Reactor Repulsor Beams (High Intensity)
                 if(mouse.x && mouse.y) {
                     let dxMouse = particlesArray[a].x - mouse.x;
                     let dyMouse = particlesArray[a].y - mouse.y;
                     let distanceMouse = (dxMouse*dxMouse) + (dyMouse*dyMouse);
                     
-                    // Huge tether distance to the core when pulling webs
-                    let beamDistance = mouse.isClicking ? 60000 : 30000;
+                    let beamDistance = mouse.isClicking ? 80000 : 40000;
                     if(distanceMouse < beamDistance) {
                         let mouseOpacity = 1 - (distanceMouse/beamDistance);
-                        // Jarvis Cyan Beams!
-                        ctx.strokeStyle = `rgba(0, 243, 255, ${mouseOpacity * 0.9})`; 
-                        ctx.lineWidth = mouse.isClicking ? 3.5 : 1.5; // Beam charges up visibly when clicking
+                        ctx.strokeStyle = `rgba(0, 243, 255, ${mouseOpacity * 0.95})`; 
+                        ctx.lineWidth = mouse.isClicking ? 4.5 : 2.0; 
                         ctx.beginPath();
                         ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
                         ctx.lineTo(mouse.x, mouse.y);
