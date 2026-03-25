@@ -1,20 +1,16 @@
+require('dotenv').config();
 const express = require('express');
 const path = require('path');
-const fs = require('fs');
+const { Pool } = require('pg');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const DB_FILE = path.join(__dirname, 'messages.json');
 
-// Initialize JSON database
-const initDb = () => {
-    if (!fs.existsSync(DB_FILE)) {
-        fs.writeFileSync(DB_FILE, JSON.stringify([]));
-        console.log('Database initialized.');
-    }
-};
-
-initDb();
+// Initialize PostgreSQL pool
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false } // Required for Supabase
+});
 
 // Middleware
 app.use(express.static(path.join(__dirname, 'public')));
@@ -22,9 +18,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // GET Route to view messages (Admin Dashboard)
-app.get('/admin', (req, res) => {
+app.get('/admin', async (req, res) => {
     try {
-        const messages = JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
+        const { rows: messages } = await pool.query('SELECT * FROM messages ORDER BY submitted_at DESC');
         let html = `
             <!DOCTYPE html>
             <html>
@@ -52,7 +48,7 @@ app.get('/admin', (req, res) => {
                 <table>
                     <tr><th>Date</th><th>Name</th><th>Email</th><th>Message</th></tr>
                     ${messages.length === 0 ? '<tr><td colspan="4" style="text-align: center; padding: 30px;">No messages yet!</td></tr>' : ''}
-                    ${messages.reverse().map(m => `<tr>
+                    ${messages.map(m => `<tr>
                         <td>${new Date(m.submitted_at).toLocaleString()}</td>
                         <td style="font-weight: 600;">${m.name}</td>
                         <td><a href="mailto:${m.email}" style="color: #60a5fa; text-decoration: none;">${m.email}</a></td>
@@ -69,7 +65,7 @@ app.get('/admin', (req, res) => {
 });
 
 // POST Route to handle contact form submission
-app.post('/contact', (req, res) => {
+app.post('/contact', async (req, res) => {
     try {
         const { name, email, message } = req.body;
 
@@ -78,21 +74,18 @@ app.post('/contact', (req, res) => {
             return res.status(400).json({ error: 'All fields are required.' });
         }
 
-        // Insert into database
-        const messages = JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
-        const newContact = {
-            id: Date.now(),
-            name,
-            email,
-            message,
-            submitted_at: new Date().toISOString()
-        };
-        messages.push(newContact);
-        fs.writeFileSync(DB_FILE, JSON.stringify(messages, null, 2));
+        // Insert into PostgreSQL database
+        const query = `
+            INSERT INTO messages (name, email, message)
+            VALUES ($1, $2, $3)
+            RETURNING id;
+        `;
+        const values = [name, email, message];
+        const result = await pool.query(query, values);
         
-        console.log(`Saved new contact message with ID: ${newContact.id}`);
+        console.log(`Saved new contact message with ID: ${result.rows[0].id}`);
         
-        return res.status(200).json({ success: true, id: newContact.id });
+        return res.status(200).json({ success: true, id: result.rows[0].id });
     } catch (err) {
         console.error('Error saving to database:', err);
         return res.status(500).json({ error: 'Internal server error.' });
