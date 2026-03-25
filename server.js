@@ -21,6 +21,53 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// GET Route to view messages (Admin Dashboard)
+app.get('/admin', (req, res) => {
+    try {
+        const messages = JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
+        let html = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Messages Admin Dashboard</title>
+                <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+                <style>
+                    body { font-family: 'Inter', sans-serif; padding: 40px; background: #0f172a; color: #f8fafc; margin: 0; }
+                    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+                    .header h1 { color: #60a5fa; margin: 0; }
+                    .refresh-btn { background: #2563eb; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; text-decoration: none; font-weight: 600; }
+                    .refresh-btn:hover { background: #1d4ed8; }
+                    table { width: 100%; border-collapse: collapse; background: #1e293b; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+                    th, td { padding: 15px; text-align: left; border-bottom: 1px solid #334155; }
+                    th { background: #1e3a8a; color: #bfdbfe; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.05em; }
+                    tr:hover { background: #334155; }
+                    td { font-size: 0.95rem; }
+                </style>
+            </head>
+            <body>
+                <div class="header">
+                    <h1>📬 Admin Dashboard</h1>
+                    <a href="/admin" class="refresh-btn">Refresh Data</a>
+                </div>
+                <table>
+                    <tr><th>Date</th><th>Name</th><th>Email</th><th>Message</th></tr>
+                    ${messages.length === 0 ? '<tr><td colspan="4" style="text-align: center; padding: 30px;">No messages yet!</td></tr>' : ''}
+                    ${messages.reverse().map(m => `<tr>
+                        <td>${new Date(m.submitted_at).toLocaleString()}</td>
+                        <td style="font-weight: 600;">${m.name}</td>
+                        <td><a href="mailto:${m.email}" style="color: #60a5fa; text-decoration: none;">${m.email}</a></td>
+                        <td>${m.message}</td>
+                    </tr>`).join('')}
+                </table>
+            </body>
+            </html>
+        `;
+        res.send(html);
+    } catch (err) {
+        res.status(500).send('Error loading dashboard.');
+    }
+});
+
 // POST Route to handle contact form submission
 app.post('/contact', (req, res) => {
     try {
