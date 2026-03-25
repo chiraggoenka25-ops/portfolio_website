@@ -224,7 +224,8 @@ document.addEventListener('DOMContentLoaded', () => {
         let mouse = {
             x: null,
             y: null,
-            radius: 130
+            radius: 150,
+            isClicking: false
         }
         
         window.addEventListener('mousemove', function(event) {
@@ -241,25 +242,33 @@ document.addEventListener('DOMContentLoaded', () => {
         window.addEventListener('mouseout', function() {
             mouse.x = undefined;
             mouse.y = undefined;
+            mouse.isClicking = false;
         });
         
-        // Click burst shockwave effect
-        window.addEventListener('click', function() {
+        // IRON SPIDER PHYSICS: Hold to pull webs, release to fire Arc Reactor blast
+        window.addEventListener('mousedown', function() {
+            mouse.isClicking = true;
+        });
+
+        window.addEventListener('mouseup', function() {
+            mouse.isClicking = false;
             if(mouse.x && mouse.y) {
+                // Arc Reactor Blast Wave Outward
                 for (let i = 0; i < particlesArray.length; i++) {
                     let dx = particlesArray[i].x - mouse.x;
                     let dy = particlesArray[i].y - mouse.y;
                     let distance = Math.sqrt(dx*dx + dy*dy);
-                    if(distance < 350) {
-                        let force = (350 - distance) / 25;
-                        particlesArray[i].vx += (dx/distance) * force;
-                        particlesArray[i].vy += (dy/distance) * force;
+                    if(distance < 500) {
+                        let force = (500 - distance) / 10;
+                        particlesArray[i].vx += (dx/distance) * force * 4; // Massive blast multiplier
+                        particlesArray[i].vy += (dy/distance) * force * 4;
                     }
                 }
             }
         });
 
-        const themeColors = ['#64ffda', '#0284c7', '#8892b0'];
+        // Theme: Iron Spider (Spidey Web Red, Jarvis Cyan, Stark Gold)
+        const themeColors = ['#e62429', '#00f3ff', '#f9d71c'];
         
         class Particle {
             constructor(x, y, directionX, directionY, size, color) {
@@ -301,20 +310,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 
                 // Ease back to normal floating speed over time after a burst
-                this.vx += (this.directionX - this.vx) * 0.02;
-                this.vy += (this.directionY - this.vy) * 0.02;
+                this.vx += (this.directionX - this.vx) * 0.05;
+                this.vy += (this.directionY - this.vy) * 0.05;
 
                 // Mouse interaction physics
                 let dx = mouse.x - this.x;
                 let dy = mouse.y - this.y;
                 let distance = Math.sqrt(dx*dx + dy*dy);
                 
-                // Gentle repulsion field around cursor
-                if (distance < mouse.radius + this.size){
-                    if (mouse.x < this.x && this.x < canvas.width - this.size * 10) { this.x += 1.5; }
-                    if (mouse.x > this.x && this.x > this.size * 10) { this.x -= 1.5; }
-                    if (mouse.y < this.y && this.y < canvas.height - this.size * 10) { this.y += 1.5; }
-                    if (mouse.y > this.y && this.y > this.size * 10) { this.y -= 1.5; }
+                if (mouse.isClicking && distance < 600) {
+                    // Spider-Web Magnetic Snare (Drags particles towards Stark Core)
+                    let force = (600 - distance) / 600;
+                    this.vx += (dx/distance) * force * 2.5; /* Powerful Attraction */
+                    this.vy += (dy/distance) * force * 2.5;
+                } else if (!mouse.isClicking && distance < mouse.radius + this.size){
+                    // Stark Shield Forcefield (Deflects away normally)
+                    if (mouse.x < this.x && this.x < canvas.width - this.size * 10) { this.x += 2; }
+                    if (mouse.x > this.x && this.x > this.size * 10) { this.x -= 2; }
+                    if (mouse.y < this.y && this.y < canvas.height - this.size * 10) { this.y += 2; }
+                    if (mouse.y > this.y && this.y > this.size * 10) { this.y -= 2; }
                 }
 
                 this.x += this.vx;
@@ -345,12 +359,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     let dy = particlesArray[a].y - particlesArray[b].y;
                     let distance = (dx*dx) + (dy*dy);
                     
-                    // Connect particles to each other
-                    if (distance < 12000) {
-                        let opacityValue = 1 - (distance/12000);
-                        ctx.strokeStyle = `rgba(100, 255, 218, ${opacityValue * 0.25})`;
+                    // Spider-Web Silks (Connects particles to each other)
+                    if (distance < 15000) {
+                        let opacityValue = 1 - (distance/15000);
+                        ctx.strokeStyle = `rgba(255, 255, 255, ${opacityValue * 0.25})`; // White/Grey spider webs
                         ctx.shadowBlur = 0; // Prevent massive line lag
-                        ctx.lineWidth = 1;
+                        ctx.lineWidth = mouse.isClicking ? 1.5 : 0.8; // Webs physically thicken under tension
                         ctx.beginPath();
                         ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
                         ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
@@ -358,16 +372,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
                 
-                // Connect particle directly to the mouse cursor!
+                // Arc Reactor Repulsor Beams (Connects directly to mouse core)
                 if(mouse.x && mouse.y) {
                     let dxMouse = particlesArray[a].x - mouse.x;
                     let dyMouse = particlesArray[a].y - mouse.y;
                     let distanceMouse = (dxMouse*dxMouse) + (dyMouse*dyMouse);
                     
-                    if(distanceMouse < 24000) {
-                        let mouseOpacity = 1 - (distanceMouse/24000);
-                        ctx.strokeStyle = `rgba(2, 132, 199, ${mouseOpacity * 0.6})`; // Creates cool blue tracking lines
-                        ctx.lineWidth = 1.2;
+                    // Huge tether distance to the core when pulling webs
+                    let beamDistance = mouse.isClicking ? 60000 : 30000;
+                    if(distanceMouse < beamDistance) {
+                        let mouseOpacity = 1 - (distanceMouse/beamDistance);
+                        // Jarvis Cyan Beams!
+                        ctx.strokeStyle = `rgba(0, 243, 255, ${mouseOpacity * 0.9})`; 
+                        ctx.lineWidth = mouse.isClicking ? 3.5 : 1.5; // Beam charges up visibly when clicking
                         ctx.beginPath();
                         ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
                         ctx.lineTo(mouse.x, mouse.y);
