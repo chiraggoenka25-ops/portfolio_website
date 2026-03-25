@@ -90,10 +90,30 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         scrollToTopBtn.addEventListener("click", () => {
-            window.scrollTo({
-                top: 0,
-                behavior: "smooth"
+            // Fire Web String to the top!
+            const webString = document.createElement('div');
+            webString.classList.add('web-string');
+            document.body.appendChild(webString);
+            
+            const rect = scrollToTopBtn.getBoundingClientRect();
+            webString.style.left = `${rect.left + rect.width / 2}px`;
+            webString.style.top = `${rect.top}px`;
+            
+            // Trigger CSS animation line shooting up
+            requestAnimationFrame(() => {
+                setTimeout(() => webString.classList.add('shoot'), 10);
             });
+            
+            // Wait for web to connect, then zip up
+            setTimeout(() => {
+                window.scrollTo({
+                    top: 0,
+                    behavior: "smooth"
+                });
+            }, 300);
+
+            // Clean up
+            setTimeout(() => webString.remove(), 1000);
         });
     }
 
